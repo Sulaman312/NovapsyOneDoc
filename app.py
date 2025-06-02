@@ -85,10 +85,13 @@ class DatabaseManager:
             try:
                 logger.info(f"🔌 Attempting MongoDB connection (attempt {attempt + 1}/{max_retries})")
                 
-                # Parse URI to hide password in logs
+                # Parse URI to hide password in logs (but keep for connection)
                 parsed_uri = urllib.parse.urlparse(MONGO_URI)
                 safe_uri = f"{parsed_uri.scheme}://{parsed_uri.hostname}:{parsed_uri.port}/{parsed_uri.path}"
                 logger.info(f"🌐 Connecting to: {safe_uri}")
+                
+                # Debug: Show the actual URI being used (first 60 chars)
+                logger.info(f"🔍 Actual connection string: {MONGO_URI[:60]}...")
                 
                 self.client = MongoClient(
                     MONGO_URI,
