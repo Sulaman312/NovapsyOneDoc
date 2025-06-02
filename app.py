@@ -39,8 +39,6 @@ if not MONGO_URI and MONGO_USERNAME and MONGO_PASSWORD and MONGO_CLUSTER:
 required_vars = ['DATABASE_NAME', 'WEBHOOK_USERNAME', 'WEBHOOK_PASSWORD']
 if not MONGO_URI:
     required_vars.extend(['MONGO_USERNAME', 'MONGO_PASSWORD', 'MONGO_CLUSTER'])
-else:
-    required_vars.append('MONGO_URI')
 
 missing_vars = [var for var in required_vars if not os.getenv(var)]
 if missing_vars:
