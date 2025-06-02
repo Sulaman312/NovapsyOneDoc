@@ -21,18 +21,31 @@ app = Flask(__name__)
 
 # Configuration from environment variables only
 MONGO_URI = os.getenv('MONGO_URI')
+MONGO_USERNAME = os.getenv('MONGO_USERNAME')
+MONGO_PASSWORD = os.getenv('MONGO_PASSWORD')
+MONGO_CLUSTER = os.getenv('MONGO_CLUSTER')
 DATABASE_NAME = os.getenv('DATABASE_NAME')
 WEBHOOK_USERNAME = os.getenv('WEBHOOK_USERNAME')
 WEBHOOK_PASSWORD = os.getenv('WEBHOOK_PASSWORD')
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 PORT = int(os.getenv('PORT', 5000))
 
+# Build MongoDB URI if separate components are provided
+if not MONGO_URI and MONGO_USERNAME and MONGO_PASSWORD and MONGO_CLUSTER:
+    MONGO_URI = f"mongodb+srv://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_CLUSTER}/{DATABASE_NAME}?retryWrites=true&w=majority&appName=Novapsy"
+    logger.info("🔧 Built MongoDB URI from separate credentials")
+
 # Validate required environment variables
-required_vars = ['MONGO_URI', 'DATABASE_NAME', 'WEBHOOK_USERNAME', 'WEBHOOK_PASSWORD']
+required_vars = ['DATABASE_NAME', 'WEBHOOK_USERNAME', 'WEBHOOK_PASSWORD']
+if not MONGO_URI:
+    required_vars.extend(['MONGO_USERNAME', 'MONGO_PASSWORD', 'MONGO_CLUSTER'])
+else:
+    required_vars.append('MONGO_URI')
+
 missing_vars = [var for var in required_vars if not os.getenv(var)]
 if missing_vars:
     print(f"❌ Missing required environment variables: {', '.join(missing_vars)}")
-    print("📝 Please create a .env file with:")
+    print("📝 Please set these in Koyeb:")
     for var in missing_vars:
         print(f"   {var}=your_value_here")
     exit(1)
@@ -73,11 +86,13 @@ class DatabaseManager:
                 
                 self.client = MongoClient(
                     MONGO_URI,
-                    serverSelectionTimeoutMS=5000,
-                    connectTimeoutMS=5000,
-                    socketTimeoutMS=5000,
+                    serverSelectionTimeoutMS=10000,
+                    connectTimeoutMS=10000,
+                    socketTimeoutMS=10000,
                     maxPoolSize=10,
-                    retryWrites=True
+                    retryWrites=True,
+                    ssl=True,
+                    tlsAllowInvalidCertificates=False
                 )
                 
                 # Test connection
