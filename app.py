@@ -33,7 +33,7 @@ PORT = int(os.getenv('PORT', 5000))
 # Build MongoDB URI if separate components are provided
 if not MONGO_URI and MONGO_USERNAME and MONGO_PASSWORD and MONGO_CLUSTER:
     MONGO_URI = f"mongodb+srv://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_CLUSTER}/{DATABASE_NAME}?retryWrites=true&w=majority&appName=Novapsy"
-    logger.info("🔧 Built MongoDB URI from separate credentials")
+    print("🔧 Built MongoDB URI from separate credentials")
 
 # Validate required environment variables
 required_vars = ['DATABASE_NAME', 'WEBHOOK_USERNAME', 'WEBHOOK_PASSWORD']
